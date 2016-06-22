@@ -29,7 +29,7 @@ class Environment:
         try:
             return self.bindings[symbol]
         except KeyError:
-            raise LispError(symbol)
+            raise LispError('name \'' + symbol + '\' is not defined')
 
     def extend(self, variables):
         new_bindings = self.bindings.copy()

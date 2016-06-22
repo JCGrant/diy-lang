@@ -33,11 +33,21 @@ def evaluate_if(ast, env):
     else:
         return evaluate(ast[3], env)
 
+def evaluate_define(ast, env):
+    if len(ast) != 3:
+        raise LispError('Wrong number of arguments')
+    symbol = ast[1]
+    if not is_symbol(symbol):
+        raise LispError(str(symbol) + ' is a non-symbol')
+    value = evaluate(ast[2], env)
+    env.set(symbol, value)
+
 SPECIAL_FORMS = {
     'quote': evaluate_quote,
     'atom': evaluate_atom,
     'eq': evaluate_eq,
     'if': evaluate_if,
+    'define': evaluate_define,
 }
 
 def evaluate_special_forms(ast, env):
@@ -70,5 +80,4 @@ def evaluate(ast, env):
             return evaluate_special_forms(ast, env)
         if exp in MATHS_OPS.keys():
             return evaluate_maths(ast, env)
-        evaluate(ast[0], env)
-    raise LispError('name \'' + ast + '\' is not defined')
+    return env.lookup(ast)
