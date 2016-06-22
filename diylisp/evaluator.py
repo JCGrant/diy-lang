@@ -51,6 +51,32 @@ def evaluate_lambda(ast, env):
     body = ast[2]
     return Closure(env, params, body)
 
+def evaluate_cons(ast, env):
+    return [evaluate(ast[1], env)] + evaluate(ast[2], env)
+
+def evaluate_head(ast, env):
+    list_ = evaluate(ast[1], env)
+    if not is_list(list_):
+        raise LispError('Can not call head on a non-list')
+    if len(list_) == 0:
+        raise LispError('Can not call head on an empty list')
+    return list_[0]
+
+def evaluate_tail(ast, env):
+    list_ = evaluate(ast[1], env)
+    if not is_list(list_):
+        raise LispError('Can not call tail on a non-list')
+    if len(list_) == 0:
+        raise LispError('Can not call tail on an empty list')
+    return list_[1:]
+
+def evaluate_empty(ast, env):
+    list_ = evaluate(ast[1], env)
+    if not is_list(list_):
+        raise LispError('Can not call tail on a non-list')
+    return len(list_) == 0
+
+
 SPECIAL_FORMS = {
     'quote': evaluate_quote,
     'atom': evaluate_atom,
@@ -58,6 +84,11 @@ SPECIAL_FORMS = {
     'if': evaluate_if,
     'define': evaluate_define,
     'lambda': evaluate_lambda,
+
+    'cons': evaluate_cons,
+    'head': evaluate_head,
+    'tail': evaluate_tail,
+    'empty': evaluate_empty,
 }
 
 def evaluate_special_forms(ast, env):
