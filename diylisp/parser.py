@@ -10,11 +10,30 @@ the workshop. Its job is to convert strings into data structures that the evalua
 understand. 
 """
 
+TRUE_VALUE = '#t'
+FALSE_VALUE = '#f'
+BOOL_VALUES = [TRUE_VALUE, FALSE_VALUE]
+
 def parse(source):
     """Parse string representation of one *single* expression
     into the corresponding Abstract Syntax Tree."""
 
-    raise NotImplementedError("DIY")
+    source = remove_comments(source).strip()
+
+    first_char = source[0]
+
+    if first_char == "'":
+        return ['quote', parse(source[1:])]
+    if source in BOOL_VALUES:
+        return source == TRUE_VALUE
+    if source.isdigit():
+        return int(source)
+    if first_char == '(':
+        if find_matching_paren(source) < len(source) - 1:
+            raise LispError('Expected EOF')
+        return [parse(elem) for elem in split_exps(source[1:-1])]
+
+    return source
 
 ##
 ## Below are a few useful utility functions. These should come in handy when 
