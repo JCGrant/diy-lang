@@ -26,10 +26,18 @@ def evaluate_eq(ast, env):
     arg2 = evaluate(ast[2], env)
     return is_atom(arg1) and is_atom(arg2) and arg1 == arg2
 
+def evaluate_if(ast, env):
+    condition = evaluate(ast[1], env)
+    if condition:
+        return evaluate(ast[2], env)
+    else:
+        return evaluate(ast[3], env)
+
 SPECIAL_FORMS = {
     'quote': evaluate_quote,
     'atom': evaluate_atom,
     'eq': evaluate_eq,
+    'if': evaluate_if,
 }
 
 def evaluate_special_forms(ast, env):
