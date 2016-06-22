@@ -1,8 +1,92 @@
 ;; Some logical operators.
 
 (define not
-    (lambda (b)
-        (if b #f #t)))
+  (lambda (b)
+    (if b #f #t)))
 
-;; DIY -- Implement the rest of your standard library
-;; here as part 7 of the workshop.
+(define or
+  (lambda (a b)
+    (if a #t b)))
+
+(define and
+  (lambda (a b)
+    (if a b #f)))
+
+(define xor
+  (lambda (a b)
+    (not (eq a b))))
+
+(define >=
+  (lambda (a b)
+    (or (> a b) (eq a b))))
+
+(define <=
+  (lambda (a b)
+    (not (> a b))))
+
+(define <
+  (lambda (a b)
+    (not (>= a b))))
+
+(define length
+  (lambda (xs)
+    (if (empty xs)
+      0
+      (+ 1 (length (tail xs))))))
+
+(define sum
+  (lambda (xs)
+    (if (empty xs)
+      0
+      (+ (head xs) (sum (tail xs))))))
+
+(define range
+  (lambda (start end)
+    (if (> start end)
+      '()
+      (cons start (range (+ 1 start) end)))))
+
+(define append
+  (lambda (xs ys)
+    (if (empty xs)
+      ys
+      (cons (head xs) (append (tail xs) ys)))))
+
+(define reverse_
+  (lambda (xs acc)
+    (if (empty xs)
+      acc
+      (reverse_ (tail xs) (cons (head xs) acc)))))
+
+(define reverse
+  (lambda (xs)
+    (reverse_ xs '())))
+
+(define filter
+  (lambda (predicate xs)
+    (if (empty xs)
+      '()
+      (if (predicate (head xs))
+        (cons (head xs) (filter predicate (tail xs)))
+        (filter predicate (tail xs))))))
+
+(define map
+  (lambda (f xs)
+    (if (empty xs)
+      '()
+      (cons (f (head xs)) (map f (tail xs))))))
+
+(define reduce
+  (lambda (f acc xs)
+    (if (empty xs)
+      acc
+      (reduce f (f acc (head xs)) (tail xs)))))
+
+(define sort
+  (lambda (xs)
+    (if (empty xs)
+      '()
+      (append
+        (sort (filter (lambda (x) (<= x (head xs))) (tail xs)))
+        (cons (head xs)
+          (sort (filter (lambda (x) (> x (head xs))) xs)))))))
