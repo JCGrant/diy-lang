@@ -84,21 +84,35 @@ def evaluate_closure(ast, env):
     closure = ast[0]
     args = [evaluate(arg, env) for arg in ast[1:]]
     params = closure.params
-    if len(args) != len(params):
-        raise LispError('Number of arguments does not much number of function parameters')
+    num_args = len(args)
+    num_params = len(params)
+    if num_args != num_params:
+        msg = 'wrong number of arguments, expected {} got {}'
+        raise LispError(msg.format(num_params, num_args))
     inside_env = closure.env.extend(dict(zip(params, args)))
     return evaluate(closure.body, inside_env)
+
+def evaluate_function_call(ast, env):
+    form = ast[0]
+    if is_symbol(form) or is_list(form):
+        return evaluate([evaluate(form, env)] + ast[1:], env)
+    else:
+        raise LispError(unparse(form) + ' is not a function')
 
 def evaluate(ast, env):
     """Evaluate an Abstract Syntax Tree in the specified environment."""
     if is_boolean(ast) or is_integer(ast):
         return ast
+    if is_symbol(ast):
+        return env.lookup(ast)
     if is_list(ast):
+        if len(ast) == 0:
+            raise LispError('Call to an emtpy list')
         exp = ast[0]
-        if exp in SPECIAL_FORMS.keys():
+        if exp in list(SPECIAL_FORMS.keys()):
             return evaluate_special_forms(ast, env)
-        if exp in MATHS_OPS.keys():
+        if exp in list(MATHS_OPS.keys()):
             return evaluate_maths(ast, env)
         if is_closure(exp):
             return evaluate_closure(ast, env)
-    return env.lookup(ast)
+        return evaluate_function_call(ast, env)
