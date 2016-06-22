@@ -35,12 +35,21 @@ def evaluate_if(ast, env):
 
 def evaluate_define(ast, env):
     if len(ast) != 3:
-        raise LispError('Wrong number of arguments')
+        raise LispError('Wrong number of arguments in define')
     symbol = ast[1]
     if not is_symbol(symbol):
         raise LispError(str(symbol) + ' is a non-symbol')
     value = evaluate(ast[2], env)
     env.set(symbol, value)
+
+def evaluate_lambda(ast, env):
+    if len(ast) != 3:
+        raise LispError('Wrong number of arguments in lambda')
+    params = ast[1]
+    if not is_list(params):
+        raise LispError('Lambda params must be a list')
+    body = ast[2]
+    return Closure(env, params, body)
 
 SPECIAL_FORMS = {
     'quote': evaluate_quote,
@@ -48,6 +57,7 @@ SPECIAL_FORMS = {
     'eq': evaluate_eq,
     'if': evaluate_if,
     'define': evaluate_define,
+    'lambda': evaluate_lambda,
 }
 
 def evaluate_special_forms(ast, env):
