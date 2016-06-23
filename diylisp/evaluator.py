@@ -76,6 +76,11 @@ def evaluate_empty(ast, env):
         raise LispError('Can not call tail on a non-list')
     return len(list_) == 0
 
+def evaluate_cond(ast, env):
+    for cond, value in ast[1]:
+        if evaluate(cond, env):
+            return evaluate(value, env)
+    return False
 
 SPECIAL_FORMS = {
     'quote': evaluate_quote,
@@ -89,6 +94,7 @@ SPECIAL_FORMS = {
     'head': evaluate_head,
     'tail': evaluate_tail,
     'empty': evaluate_empty,
+    'cond': evaluate_cond,
 }
 
 def evaluate_special_forms(ast, env):
