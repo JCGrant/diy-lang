@@ -20,6 +20,10 @@ def parse(source):
 
     source = remove_comments(source).strip()
 
+    exp, rest = first_expression(source)
+    if rest:
+        raise LispError('Expected EOF, got {}'.format(rest))
+
     first_char = source[0]
 
     if first_char == "'":
@@ -29,9 +33,9 @@ def parse(source):
     if source.isdigit():
         return int(source)
     if first_char == '(':
-        if find_matching_paren(source) < len(source) - 1:
-            raise LispError('Expected EOF')
         return [parse(elem) for elem in split_exps(source[1:-1])]
+    if first_char == '"':
+        return String(source[1:-1])
 
     return source
 
@@ -54,13 +58,16 @@ def find_matching_paren(source, start=0):
     assert source[start] == '('
     pos = start
     open_brackets = 1
+    inside_string = False
     while open_brackets > 0:
         pos += 1
         if len(source) == pos:
             raise LispError("Incomplete expression: %s" % source[start:])
-        if source[pos] == '(':
+        if source[pos] == '"' and source[pos - 1] != '\\':
+            inside_string = not inside_string
+        if source[pos] == '(' and not inside_string:
             open_brackets += 1
-        if source[pos] == ')':
+        if source[pos] == ')' and not inside_string:
             open_brackets -= 1
     return pos
 
@@ -93,7 +100,12 @@ def first_expression(source):
     if source[0] == "'":
         exp, rest = first_expression(source[1:])
         return source[0] + exp, rest
-    elif source[0] == "(":
+    if source[0] == '"':
+        for n in range(1, len(source)):
+            if source[n] == '"' and source[n - 1] != '\\':
+                return source[:n + 1], source[n + 1:]
+        raise LispError("Unclosed string: {}".format(source))
+    if source[0] == "(":
         last = find_matching_paren(source)
         return source[:last + 1], source[last + 1:]
     else:

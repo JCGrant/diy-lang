@@ -52,10 +52,16 @@ def evaluate_lambda(ast, env):
     return Closure(env, params, body)
 
 def evaluate_cons(ast, env):
-    return [evaluate(ast[1], env)] + evaluate(ast[2], env)
+    head = evaluate(ast[1], env)
+    tail = evaluate(ast[2], env)
+    if is_string(head) and is_string(tail):
+        return String(head.val + tail.val)
+    return [head] + tail
 
 def evaluate_head(ast, env):
     list_ = evaluate(ast[1], env)
+    if is_string(list_):
+        return String(list_.val[0])
     if not is_list(list_):
         raise LispError('Can not call head on a non-list')
     if len(list_) == 0:
@@ -64,6 +70,8 @@ def evaluate_head(ast, env):
 
 def evaluate_tail(ast, env):
     list_ = evaluate(ast[1], env)
+    if is_string(list_):
+        return String(list_.val[1:])
     if not is_list(list_):
         raise LispError('Can not call tail on a non-list')
     if len(list_) == 0:
@@ -72,6 +80,8 @@ def evaluate_tail(ast, env):
 
 def evaluate_empty(ast, env):
     list_ = evaluate(ast[1], env)
+    if is_string(list_):
+        return list_.val == ''
     if not is_list(list_):
         raise LispError('Can not call tail on a non-list')
     return len(list_) == 0
@@ -138,7 +148,7 @@ def evaluate_function_call(ast, env):
 
 def evaluate(ast, env):
     """Evaluate an Abstract Syntax Tree in the specified environment."""
-    if is_boolean(ast) or is_integer(ast):
+    if is_boolean(ast) or is_integer(ast) or is_string(ast):
         return ast
     if is_symbol(ast):
         return env.lookup(ast)
