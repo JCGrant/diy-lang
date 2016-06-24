@@ -33,6 +33,13 @@ def evaluate_if(ast, env):
     else:
         return evaluate(ast[3], env)
 
+def evaluate_let(ast, env):
+    bindings = ast[1]
+    body = ast[2]
+    for symbol, exp in bindings:
+        env = env.extend({symbol: evaluate(exp, env)})
+    return evaluate(body, env)
+
 def evaluate_define(ast, env):
     if len(ast) != 3:
         raise LispError('Wrong number of arguments in define')
@@ -97,9 +104,9 @@ SPECIAL_FORMS = {
     'atom': evaluate_atom,
     'eq': evaluate_eq,
     'if': evaluate_if,
+    'let': evaluate_let,
     'define': evaluate_define,
     'lambda': evaluate_lambda,
-
     'cons': evaluate_cons,
     'head': evaluate_head,
     'tail': evaluate_tail,
