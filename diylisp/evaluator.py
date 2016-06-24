@@ -58,6 +58,12 @@ def evaluate_lambda(ast, env):
     body = ast[2]
     return Closure(env, params, body)
 
+def evaluate_defn(ast, env):
+    name = ast[1]
+    params = ast[2]
+    body = ast[3]
+    env.set(name, Closure(env, params, body))
+
 def evaluate_cons(ast, env):
     head = evaluate(ast[1], env)
     tail = evaluate(ast[2], env)
@@ -107,6 +113,7 @@ SPECIAL_FORMS = {
     'let': evaluate_let,
     'define': evaluate_define,
     'lambda': evaluate_lambda,
+    'defn': evaluate_defn,
     'cons': evaluate_cons,
     'head': evaluate_head,
     'tail': evaluate_tail,
